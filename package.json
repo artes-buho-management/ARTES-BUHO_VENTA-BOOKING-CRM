@@ -1,0 +1,29 @@
+{
+  "name": "venta-booking-crm-gas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Proyecto Apps Script vinculado a Google Sheet CRM VENTA-BOOKING con sync GitHub",
+  "type": "commonjs",
+  "scripts": {
+    "deps:install": "npm.cmd install",
+    "gas:create": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\gas_cmd.ps1 -Action create -SheetId 1MynyGPeRhpuo57XbjskdwVxoqgkmpfVwsPE4i7eRycM -Title \"CRM VENTA-BOOKING\"",
+    "gas:login": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\gas_cmd.ps1 -Action login",
+    "gas:status": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\gas_cmd.ps1 -Action status",
+    "gas:pull": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\gas_cmd.ps1 -Action pull",
+    "gas:push": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\gas_cmd.ps1 -Action push",
+    "gas:open": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\gas_cmd.ps1 -Action open",
+    "gas:watch": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\gas_cmd.ps1 -Action watch",
+    "gas:inspect": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\gas_cmd.ps1 -Action run -FunctionName codexInspeccionarHojaVinculada",
+    "sync:status": "powershell -NoProfile -ExecutionPolicy Bypass -File ..\\..\\03_SCRIPTS_UTILIDAD\\sync_git_gas.ps1 -Action status -RepoPath \"%cd%\"",
+    "sync:down": "powershell -NoProfile -ExecutionPolicy Bypass -File ..\\..\\03_SCRIPTS_UTILIDAD\\sync_git_gas.ps1 -Action down -RepoPath \"%cd%\" -AllowDirty",
+    "sync:up": "powershell -NoProfile -ExecutionPolicy Bypass -File ..\\..\\03_SCRIPTS_UTILIDAD\\sync_git_gas.ps1 -Action up -RepoPath \"%cd%\"",
+    "sync:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File ..\\..\\03_SCRIPTS_UTILIDAD\\sync_git_gas.ps1 -Action audit -RepoPath \"%cd%\"",
+    "sync:realtime": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\sync-realtime.ps1 -Branch main -DebounceSeconds 20",
+    "email:review": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\run_email_review.ps1",
+    "email:review:dry": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\run_email_review.ps1 -DryRun",
+    "email:schedule:15m": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\schedule_email_review_15m.ps1"
+  },
+  "devDependencies": {
+    "@google/clasp": "^3.2.0"
+  }
+}

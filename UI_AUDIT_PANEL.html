@@ -1,0 +1,281 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        color: #0c1b2a;
+        background:
+          radial-gradient(circle at 10% 10%, rgba(123, 217, 255, 0.35), transparent 36%),
+          radial-gradient(circle at 90% 15%, rgba(140, 255, 198, 0.3), transparent 32%),
+          linear-gradient(160deg, #eaf7ff 0%, #f6fbff 52%, #e5fbf3 100%);
+      }
+      .wrap {
+        padding: 18px 20px 16px;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(63, 133, 173, 0.25);
+        border-radius: 14px;
+        box-shadow: 0 8px 24px rgba(24, 61, 94, 0.12);
+        backdrop-filter: blur(2px);
+      }
+      .title {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        margin: 0 0 6px;
+      }
+      .subtitle {
+        margin: 0;
+        font-size: 13px;
+        color: #36526a;
+      }
+      .hero {
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+      .bar-wrap {
+        margin-top: 14px;
+        height: 26px;
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid #74b4d8;
+        background: #dff1fb;
+      }
+      .bar {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #18a9ff, #00c6a2);
+        transition: width 0.2s ease;
+        box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.45);
+      }
+      .percent {
+        margin-top: 10px;
+        font-size: 34px;
+        font-weight: 800;
+      }
+      .status {
+        margin: 6px 0 0;
+        min-height: 24px;
+        font-size: 14px;
+      }
+      .status.done {
+        color: #11663f;
+        font-weight: 700;
+      }
+      .status.error {
+        color: #9c1c2a;
+        font-weight: 700;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(100px, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .stat {
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(34, 84, 127, 0.2);
+        background: rgba(255, 255, 255, 0.9);
+      }
+      .stat .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #4e6780;
+      }
+      .stat .value {
+        margin-top: 4px;
+        font-size: 24px;
+        font-weight: 800;
+      }
+      .events {
+        height: 220px;
+        overflow: auto;
+        padding: 10px 12px;
+        font-size: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(28, 76, 116, 0.26);
+        background: #f5fbff;
+        white-space: pre-wrap;
+        line-height: 1.4;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      button {
+        border: none;
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .primary {
+        background: linear-gradient(90deg, #1089d9, #0ab891);
+        color: #fff;
+      }
+      .secondary {
+        background: #dce9f3;
+        color: #21374d;
+      }
+      .footer {
+        margin-top: 10px;
+        font-size: 11px;
+        color: #5a748b;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card hero">
+        <h1 class="title">AUDITORIA IA DE CONTACTOS</h1>
+        <p class="subtitle">Hoja bloqueada durante proceso. Estado en tiempo real (0% a 100%).</p>
+        <div class="bar-wrap"><div id="bar" class="bar"></div></div>
+        <div id="percent" class="percent">0%</div>
+        <div id="status" class="status">Listo para iniciar.</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="label">BIEN</div><div id="good" class="value">0</div></div>
+        <div class="stat"><div class="label">MAL</div><div id="bad" class="value">0</div></div>
+        <div class="stat"><div class="label">CORREGIDO</div><div id="fixed" class="value">0</div></div>
+        <div class="stat"><div class="label">CAMBIOS</div><div id="changed" class="value">0</div></div>
+      </div>
+
+      <div id="events" class="events card">Sin actividad todavía.</div>
+
+      <div class="actions">
+        <button id="startBtn" class="primary" onclick="startAudit()">INICIAR AUDITORIA</button>
+        <button id="closeBtn" class="secondary" onclick="google.script.host.close()">CERRAR</button>
+      </div>
+      <div class="footer">RUBEN COTON | ARTES BUHO</div>
+    </div>
+
+    <script>
+      let running = false;
+
+      function setProgress(percent, text) {
+        const p = Math.max(0, Math.min(100, Number(percent || 0)));
+        document.getElementById("bar").style.width = p + "%";
+        document.getElementById("percent").textContent = p + "%";
+        if (text) document.getElementById("status").textContent = text;
+      }
+
+      function setStatusClass(kind) {
+        const el = document.getElementById("status");
+        el.className = "status" + (kind ? " " + kind : "");
+      }
+
+      function setError(text) {
+        setStatusClass("error");
+        document.getElementById("status").textContent = text || "Error de auditoria";
+      }
+
+      function setDone(text) {
+        setStatusClass("done");
+        document.getElementById("status").textContent = text || "Auditoria completada";
+      }
+
+      function setButtons(isRunning) {
+        document.getElementById("startBtn").disabled = isRunning;
+        document.getElementById("closeBtn").disabled = isRunning;
+      }
+
+      function updateStats(stats) {
+        const s = stats || {};
+        document.getElementById("good").textContent = Number(s.good || 0);
+        document.getElementById("bad").textContent = Number(s.bad || 0);
+        document.getElementById("fixed").textContent = Number(s.fixed || 0);
+        document.getElementById("changed").textContent = Number(s.changedCells || 0);
+      }
+
+      function updateEvents(list) {
+        const events = Array.isArray(list) ? list : [];
+        document.getElementById("events").textContent = events.length
+          ? events.join("\n")
+          : "Sin actividad todavía.";
+      }
+
+      function startAudit() {
+        if (running) return;
+        running = true;
+        setButtons(true);
+        setStatusClass("");
+        setProgress(0, "Preparando auditoria...");
+        updateStats({});
+        updateEvents([]);
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (!res || !res.ok) {
+              running = false;
+              setButtons(false);
+              setError("No se pudo iniciar la auditoria.");
+              return;
+            }
+            setProgress(res.percent || 0, "Auditoria iniciada...");
+            updateStats(res.stats);
+            updateEvents(res.recentEvents);
+            runStep();
+          })
+          .withFailureHandler((err) => {
+            running = false;
+            setButtons(false);
+            setError("Error al iniciar: " + (err && err.message ? err.message : err));
+          })
+          .codexUiIniciarAuditoriaContactos();
+      }
+
+      function runStep() {
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (!res || !res.ok) {
+              running = false;
+              setButtons(false);
+              setError("Fallo durante la auditoria.");
+              return;
+            }
+
+            const msg =
+              (res.currentSheet ? "Pestana: " + res.currentSheet + " | " : "") +
+              (res.message || "") +
+              (res.totalRows ? " (" + res.doneRows + "/" + res.totalRows + ")" : "");
+
+            setProgress(res.percent || 0, msg);
+            updateStats(res.stats);
+            updateEvents(res.recentEvents);
+
+            if (res.done) {
+              running = false;
+              setProgress(100, msg);
+              setDone("Auditoria completada. Panel actualizado.");
+              setButtons(false);
+              return;
+            }
+
+            setTimeout(runStep, 160);
+          })
+          .withFailureHandler((err) => {
+            running = false;
+            setButtons(false);
+            setError("Error durante la auditoria: " + (err && err.message ? err.message : err));
+          })
+          .codexUiAuditarContactosPaso();
+      }
+    </script>
+  </body>
+</html>
